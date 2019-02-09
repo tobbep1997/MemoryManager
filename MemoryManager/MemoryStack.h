@@ -11,6 +11,9 @@ public:
 	template <typename T>
 	static T* AllocData();
 
+	template <typename T>
+	static void Free(T* ptr);
+
 	static bool SafeData(void * address, const size_t & size);
 
 private:
@@ -25,8 +28,18 @@ T* MemoryStack::AllocData()
 	const size_t alignedSize = (sizeof(T) + ALIGNMENT) & ~ALIGNMENT;
 
 	void * returnAddress = reinterpret_cast<char*>(MemoryAllocator::Data) + m_allocatorOffset;
-	m_allocatorOffset = (m_allocatorOffset + alignedSize) % m_heapSize;
+	if (SafeData(returnAddress, alignedSize))
+	{
+		m_allocatorOffset = (m_allocatorOffset + alignedSize) % m_heapSize;
+		return reinterpret_cast<T*>(returnAddress);
+	}
 
-	return reinterpret_cast<T*>(returnAddress);
+	return nullptr;
+}
+
+template <typename T>
+void MemoryStack::Free(T* ptr)
+{
+	ZeroMemory(ptr, sizeof(T));
 }
 

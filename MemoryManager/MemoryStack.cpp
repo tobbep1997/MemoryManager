@@ -1,4 +1,5 @@
 #include "MemoryStack.h"
+#include <iostream>
 
 size_t MemoryStack::m_allocatorOffset = 0;
 size_t MemoryStack::m_heapSize = 0;
@@ -17,11 +18,14 @@ void MemoryStack::Release()
 
 bool MemoryStack::SafeData(void* address, const size_t& size)
 {
-	char* addressStartPoint = reinterpret_cast<char*>(address);
-	for (char* i = addressStartPoint; i < addressStartPoint + size; i += ALIGNMENT)
+	if (reinterpret_cast<char*>(address) + size >
+		reinterpret_cast<char*>(MemoryAllocator::Data) + m_heapSize)
+		return false;
+
+	const char value = *reinterpret_cast<char *>(address);
+	for (unsigned int i = 0; i < size; i++)
 	{
-		const unsigned ad = reinterpret_cast<unsigned>(i);
-		if (ad)
+		if ((value >> i & 1))
 			return false;
 	}
 	return true;

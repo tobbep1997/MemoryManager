@@ -1,15 +1,14 @@
 #include "MemoryAllocator.h"
 #include <cstdlib>
 
-
 void * MemoryAllocator::Data = nullptr;
 
 void MemoryAllocator::Init(const size_t& size)
 {
 	if (Data)
-		Release();
-	
+		Release();	
 	Data = _aligned_malloc(size, ALIGNMENT);
+	ZeroMemory(Data, size);
 }
 
 void MemoryAllocator::Release()
