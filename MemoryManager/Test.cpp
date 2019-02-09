@@ -29,7 +29,6 @@ struct TestStruct
 int main()
 {
 	const size_t testSize = 0xfffffff;
-	MemoryStack::Init(testSize * sizeof(TestStruct));
 	SetDbgFlag();
 
 
@@ -55,9 +54,9 @@ int main()
 	std::cout << "Default: " << DefaultTime << " Sec" << std::endl;
 
 	std::cout << "Pre Alloc " << testSize << " Objects " << " Start" << std::endl;
-	delete[] test;
 
-	test = new TestStruct*[testSize];
+	MemoryStack::Init(testSize * sizeof(TestStruct));
+
 	timer.Init();
 	for (size_t i = 0; i < testSize; i++)
 	{
