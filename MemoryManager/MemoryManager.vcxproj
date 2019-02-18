@@ -118,6 +118,7 @@
     <ClCompile Include="DeltaTimer.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
     <ClCompile Include="MemoryStack.cpp" />
+    <ClCompile Include="OutputClass.cpp" />
     <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -125,6 +126,7 @@
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="MemoryAllocator.h" />
     <ClInclude Include="MemoryStack.h" />
+    <ClInclude Include="OutputClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
