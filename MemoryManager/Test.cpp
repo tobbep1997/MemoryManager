@@ -1,7 +1,10 @@
 #include <iostream>
+#include <memory>
 #include "MemoryStack.h"
 
 #include "DeltaTimer.h"
+#include <vector>
+#include <thread>
 
 void SetDbgFlag()
 {
@@ -24,13 +27,62 @@ struct TestStruct
 			float r, g, b, a;
 		};
 	};
+
+	TestStruct()
+	{
+		x = 0, y = 0, z = 0, w = 0;
+	}
 };
+
+void MemoryAllocatorTest();
+const size_t testSize = 20000000;
+const int loop = 5;
+int counter = 0;
+
+std::vector<double> timeSmart;
+std::vector<double> timeRaw;
+
+void threadCounter()
+{
+	while (counter < loop)
+	{
+		std::cout << "\r" << ((float)counter / (float)loop) * 100 << "%";
+		Sleep(100);
+	}
+	system("cls");
+}
 
 int main()
 {
-	const size_t testSize = 0xfffffff;
+	//const size_t testSize = 0xfffffff;
+	
 	SetDbgFlag();
+	std::thread te = std::thread(threadCounter);
+	for (size_t i = 0; i < loop; i++)
+	{
+		MemoryAllocatorTest();
+		counter++;
+	}
+	te.join();
 
+	double sum = 0.0f;
+	for (int i = 0; i < timeSmart.size(); ++i)
+	{
+		sum += timeSmart.at(i);
+	}
+	sum /= timeSmart.size();
+	std::cout << "SmartPointer avr: " << sum << std::endl;
+
+	sum = 0.0f;
+	for (int i = 0; i < timeRaw.size(); ++i)
+	{
+		sum += timeRaw.at(i);
+	}
+	sum /= timeRaw.size();
+	std::cout << "RawPointer avr: " << sum << std::endl;
+
+	std::cin.get();
+	return 0;
 
 	DeltaTimer timer;
 
@@ -82,4 +134,41 @@ int main()
 	MemoryStack::Release();
 	std::cin.get();
 	return 0;
+}
+
+void MemoryAllocatorTest()
+{
+	DeltaTimer timer;
+
+	double smart;
+	double raw;
+
+	timer.Init();
+	std::unique_ptr<std::unique_ptr<TestStruct>[]> smartArray;
+	smartArray = std::make_unique< std::unique_ptr<TestStruct>[] >(testSize);
+	for (int i = 0; i < testSize; i++)
+	{
+		smartArray[i] = std::make_unique<TestStruct>();
+	}
+	smart = timer.GetDeltaTimeInSeconds();
+	timeSmart.push_back(smart);
+
+	timer.Init();
+	TestStruct ** test = new TestStruct*[testSize];
+	for (size_t i = 0; i < testSize; i++)
+	{
+		test[i] = new TestStruct();
+	}
+	raw = timer.GetDeltaTimeInSeconds();
+	timeRaw.push_back(raw);
+
+	
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		delete test[i];
+	}
+	delete[] test;
+	
+
 }
