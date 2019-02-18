@@ -43,6 +43,14 @@ void TestTestStruct(TestStruct* test);
 
 int main(int commands, char * arr[])
 {
+
+	LinkedListOwnHeap oh;
+	for (int i = 0; i < 100; i++)
+	{
+		oh.Insert(i);
+	}
+	oh.PrintAllData();
+
 	if (commands <= 1)
 	{
 		int commands = 3;
@@ -68,6 +76,8 @@ int main(int commands, char * arr[])
 
 		OutputClass::Output(arr[2], alloc, read, random);
 	}
+
+	
 	
 
 	
