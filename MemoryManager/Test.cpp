@@ -58,7 +58,7 @@ int main()
 	//const size_t testSize = 0xfffffff;
 	
 
-	LinkedList list;
+	LinkedListSmart list;
 	for (size_t i = 0; i < 50; i++)
 	{
 		list.Insert(i);
