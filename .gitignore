@@ -334,3 +334,7 @@ MemoryManager/PreAlloc\.txt
 MemoryManager/Raw\.txt
 
 MemoryManager/output\.txt
+
+MemoryManager/RawLinkedList\.txt
+
+MemoryManager/SmartLinkedList\.txt

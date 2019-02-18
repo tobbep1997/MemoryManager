@@ -41,6 +41,10 @@ struct TestStruct
 void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
 void SmartPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
 void PreHeapPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
+
+void LinkedRawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
+void LinkedSmartPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
+
 void TestTestStruct(TestStruct* test);
 
 int main(int commands, char * arr[])
@@ -69,6 +73,21 @@ int main(int commands, char * arr[])
 
 	PreHeapPointerTest(&alloc, &read, &random, size, 420);
 	OutputClass::Output("PreAlloc.txt", alloc, read, random);
+
+	alloc.clear();
+	read.clear();
+	random.clear();
+	
+	LinkedRawPointerTest(&alloc, &read, &random, size, 420);
+	OutputClass::Output("RawLinkedList.txt", alloc, read, random);
+
+	//alloc.clear();
+	//read.clear();
+	//random.clear();
+
+	//LinkedSmartPointerTest(&alloc, &read, &random, size, 420);
+	//OutputClass::Output("SmartLinkedList.txt", alloc, read, random);
+
 }
 
 void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed)
@@ -200,6 +219,61 @@ void PreHeapPointerTest(std::vector<double> * allocTime, std::vector<double> * r
 	MemoryStack::Release();
 	
 }
+
+void LinkedRawPointerTest(std::vector<double>* allocTime, std::vector<double>* readTime,
+	std::vector<double>* randomAccess, const unsigned& testSize, const unsigned& randomSeed)
+{
+	srand(randomSeed);
+
+	LinkedListRaw<TestStruct*> allocTest;
+
+	DeltaTimer timer;
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		timer.Init();
+
+		allocTest.Insert(new TestStruct());
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		allocTime->push_back(t);
+	}
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		timer.Init();
+
+		TestStruct * tmp = allocTest.GetAt(i);
+		TestTestStruct(tmp);
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		readTime->push_back(t);
+	}
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		timer.Init();
+
+		TestStruct * tmp = allocTest.GetAt(rand() % testSize);
+		TestTestStruct(tmp);
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		randomAccess->push_back(t);
+	}
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		delete allocTest.GetAt(i);
+	}
+
+
+}
+void LinkedSmartPointerTest(std::vector<double>* allocTime, std::vector<double>* readTime,
+	std::vector<double>* randomAccess, const unsigned& testSize, const unsigned& randomSeed)
+{
+	
+}
+
 void TestTestStruct(TestStruct* test)
 {
 	float x = test->x;

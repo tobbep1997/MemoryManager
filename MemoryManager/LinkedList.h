@@ -2,16 +2,18 @@
 #include <sal.h>
 #include <iostream>
 
+#pragma region Raw
+template <typename T>
 class LinkedListRaw
 {
 private:
 
 	struct Node
 	{
-		int data;
+		T data;
 		Node * next = nullptr;
 
-		Node(_In_opt_ const int & DATA = 0)
+		Node(_In_opt_ const T & DATA = 0)
 		{
 			data = DATA;
 			next = nullptr;
@@ -26,11 +28,14 @@ public:
 
 	Node * m_list = nullptr;
 	
-	void Insert(_In_opt_ const int & data = 0);
+	void Insert(_In_opt_ const T & data = 0);
+	const T & GetAt(_In_opt_ const unsigned int & index);
+	   
 	void PrintAllData();
 
 };
-inline void LinkedListRaw::Insert(_In_opt_ const int & data)
+template <typename T>
+inline void LinkedListRaw<T>::Insert(_In_opt_ const T & data)
 {
 	if (m_list == nullptr)
 	{
@@ -56,8 +61,8 @@ inline void LinkedListRaw::Insert(_In_opt_ const int & data)
 		}
 	}
 }
-
-inline void LinkedListRaw::PrintAllData()
+template <typename T>
+inline void LinkedListRaw<T>::PrintAllData()
 {
 	int counter = 0;
 	Node * node = m_list;
@@ -68,7 +73,21 @@ inline void LinkedListRaw::PrintAllData()
 		counter++;
 	}
 }
+template <typename T>
+inline const T& LinkedListRaw<T>::GetAt(const unsigned& index)
+{
+	unsigned int counter = 0;
+	Node * node = m_list;
+	while (node != nullptr && counter < index)
+	{
+		node = node->next;
+		counter++;
+	}
+	return node->data;
+}
+#pragma endregion 
 
+#pragma region Smart
 class LinkedListSmart
 {
 private:
@@ -94,10 +113,10 @@ public:
 	std::shared_ptr<Node> m_list = nullptr;
 
 	void Insert(_In_opt_ const int & data = 0);
+	const int & GetAt(_In_opt_ const unsigned int & index);
 	void PrintAllData();
 
 };
-
 inline void LinkedListSmart::Insert(_In_opt_ const int& data)
 {
 	if (m_list == nullptr)
@@ -124,7 +143,6 @@ inline void LinkedListSmart::Insert(_In_opt_ const int& data)
 		}
 	}
 }
-
 inline void LinkedListSmart::PrintAllData()
 {
 	int counter = 0;
@@ -136,6 +154,19 @@ inline void LinkedListSmart::PrintAllData()
 		counter++;
 	}
 }
+
+const int& LinkedListSmart::GetAt(const unsigned& index)
+{
+	unsigned int counter = 0;
+	Node * node = m_list.get();
+	while (node != nullptr && counter < index)
+	{
+		node = node->next.get();
+		counter++;
+	}
+	return node->data;
+}
+#pragma endregion 
 
 class LinkedListOwnHeap
 {
