@@ -1,6 +1,7 @@
 #include "OutputClass.h"
 #include <fstream>
 #include <limits>
+#include <iostream>
 
 typedef std::numeric_limits< double > dbl;
 
@@ -27,7 +28,7 @@ void OutputClass::Output(const std::string& outputFile, const std::vector<double
 	using namespace std;
 
 	const bool exist = file_exists(outputFile);
-
+	std::cout << "Start Output: " << outputFile.c_str() << std::endl;
 	ofstream out(outputFile, ofstream::out | ofstream::app);
 	
 
@@ -44,4 +45,6 @@ void OutputClass::Output(const std::string& outputFile, const std::vector<double
 	}
 
 	out.close();
+	std::cout << "End Output: " << outputFile.c_str() << std::endl;
+
 }
