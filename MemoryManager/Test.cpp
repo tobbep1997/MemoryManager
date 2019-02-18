@@ -39,6 +39,7 @@ struct TestStruct
 };
 
 void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
+void SmartPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
 void PreHeapPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
 void TestTestStruct(TestStruct* test);
 
@@ -54,6 +55,13 @@ int main(int commands, char * arr[])
 
 	RawPointerTest(&alloc, &read, &random, size, 420);
 	OutputClass::Output("Raw.txt", alloc, read, random);
+
+	alloc.clear();
+	read.clear();
+	random.clear();
+
+	RawPointerTest(&alloc, &read, &random, size, 420);
+	OutputClass::Output("Smart.txt", alloc, read, random);
 
 	alloc.clear();
 	read.clear();
@@ -109,6 +117,45 @@ void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readT
 
 	delete[] allocTest;
 }
+void SmartPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed)
+{
+	srand(randomSeed);
+	std::unique_ptr<std::unique_ptr<TestStruct>[]> allocTest = std::make_unique< std::unique_ptr<TestStruct>[] >(testSize);
+
+	DeltaTimer timer;
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		timer.Init();
+
+		allocTest[i] = std::make_unique<TestStruct>();
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		allocTime->push_back(t);
+	}
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		timer.Init();
+		
+		TestStruct * tmp = allocTest[i].get();
+		TestTestStruct(tmp);
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		readTime->push_back(t);
+	}
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		timer.Init();
+
+		TestStruct * tmp = allocTest[rand() % testSize].get();
+		TestTestStruct(tmp);
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		randomAccess->push_back(t);
+	}
+}
 void PreHeapPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed)
 {
 	srand(randomSeed);
@@ -153,7 +200,6 @@ void PreHeapPointerTest(std::vector<double> * allocTime, std::vector<double> * r
 	MemoryStack::Release();
 	
 }
-
 void TestTestStruct(TestStruct* test)
 {
 	float x = test->x;
