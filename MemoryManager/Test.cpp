@@ -1,7 +1,14 @@
 #include <iostream>
+#include <memory>
 #include "MemoryStack.h"
 
 #include "DeltaTimer.h"
+#include <vector>
+#include <thread>
+#include "LinkedList.h"
+#include "OutputClass.h"
+#include <cstdlib>
+#include <string>
 
 void SetDbgFlag()
 {
@@ -24,62 +31,133 @@ struct TestStruct
 			float r, g, b, a;
 		};
 	};
+
+	TestStruct()
+	{
+		x = 0, y = 0, z = 0, w = 0;
+	}
 };
 
-int main()
-{
-	const size_t testSize = 0xfffffff;
-	SetDbgFlag();
+void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
+void PreHeapPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
+void TestTestStruct(TestStruct* test);
 
+int main(int commands, char * arr[])
+{
+	std::vector<double> alloc;
+	std::vector<double> read;
+	std::vector<double> random;
+
+	int size = 1024;
+	if (commands > 1)
+	size = std::atoi(arr[1]);
+
+	RawPointerTest(&alloc, &read, &random, size, 420);
+	OutputClass::Output("Raw.txt", alloc, read, random);
+
+	alloc.clear();
+	read.clear();
+	random.clear();
+
+	PreHeapPointerTest(&alloc, &read, &random, size, 420);
+	OutputClass::Output("PreAlloc.txt", alloc, read, random);
+}
+
+void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed)
+{
+	srand(randomSeed);
+	TestStruct ** allocTest = new TestStruct*[testSize];
+
+	DeltaTimer timer;
+	
+	for (size_t i = 0; i < testSize; i++)
+	{
+		timer.Init();
+
+		allocTest[i] = new TestStruct();
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		allocTime->push_back(t);
+	}
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		timer.Init();
+
+		TestStruct * tmp = allocTest[i];
+		TestTestStruct(tmp);
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		readTime->push_back(t);
+	}
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		timer.Init();
+
+		TestStruct * tmp = allocTest[rand() % testSize];
+		TestTestStruct(tmp);
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		randomAccess->push_back(t);
+	}
+
+	for (size_t i = 0; i < testSize; i++)
+	{
+		delete allocTest[i];
+	}
+
+	delete[] allocTest;
+}
+void PreHeapPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed)
+{
+	srand(randomSeed);
+	TestStruct ** allocTest = new TestStruct*[testSize];
 
 	DeltaTimer timer;
 
-	std::cout << "Default Alloc " << testSize << " Objects " << " Start" << std::endl;
-
-	TestStruct ** test = new TestStruct*[testSize];
-
-
-	timer.Init();
+	MemoryStack::Init(sizeof(TestStruct) * testSize);
 	for (size_t i = 0; i < testSize; i++)
 	{
-		test[i] = new TestStruct();
+
+		timer.Init();
+		allocTest[i] = MemoryStack::AllocData<TestStruct>();
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		allocTime->push_back(t);
 	}
+
 	for (size_t i = 0; i < testSize; i++)
 	{
-		delete test[i];
+		timer.Init();
+
+		TestStruct * tmp = allocTest[i];
+		TestTestStruct(tmp);
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		readTime->push_back(t);
 	}
 
-	const double DefaultTime = timer.GetDeltaTimeInSeconds();
-	
-	std::cout << "Default: " << DefaultTime << " Sec" << std::endl;
-
-	std::cout << "Pre Alloc " << testSize << " Objects " << " Start" << std::endl;
-
-	MemoryStack::Init(testSize * sizeof(TestStruct));
-
-	timer.Init();
 	for (size_t i = 0; i < testSize; i++)
 	{
-		test[i] = MemoryStack::AllocData<TestStruct>();
-		test[i]->x = static_cast<float>(i);
-		test[i]->y = static_cast<float>(i);
-		test[i]->z = static_cast<float>(i);
-		test[i]->w = static_cast<float>(i);
+		timer.Init();
+
+		TestStruct * tmp = allocTest[rand() % testSize];
+		TestTestStruct(tmp);
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		randomAccess->push_back(t);
 	}
-	for (size_t i = 0; i < testSize; i++)
-	{
-		MemoryStack::Free(test[i]);
-	}
-	const double MemTime = timer.GetDeltaTimeInSeconds();
-
-	delete[] test;
-
-	std::cout << "MemoryAllocator: " << MemTime << " Sec" << std::endl;
-
-
-
-
+	   
+	delete[] allocTest;
 	MemoryStack::Release();
-	std::cin.get();
-	return 0;
+	
+}
+
+void TestTestStruct(TestStruct* test)
+{
+	float x = test->x;
+	float y = test->y;
+	float z = test->z;
+	float w = test->w;
 }
