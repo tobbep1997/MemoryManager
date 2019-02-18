@@ -1,7 +1,11 @@
 #include <iostream>
+#include <memory>
 #include "MemoryStack.h"
 
 #include "DeltaTimer.h"
+#include <vector>
+#include <thread>
+#include "LinkedList.h"
 #include "OutputClass.h"
 #include <cstdlib>
 #include <string>
@@ -27,6 +31,11 @@ struct TestStruct
 			float r, g, b, a;
 		};
 	};
+
+	TestStruct()
+	{
+		x = 0, y = 0, z = 0, w = 0;
+	}
 };
 
 void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
