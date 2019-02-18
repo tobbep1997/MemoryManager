@@ -5,6 +5,7 @@
 #include "DeltaTimer.h"
 #include <vector>
 #include <thread>
+#include "LinkedList.h"
 
 void SetDbgFlag()
 {
@@ -56,6 +57,14 @@ int main()
 {
 	//const size_t testSize = 0xfffffff;
 	
+
+	LinkedList list;
+	for (size_t i = 0; i < 50; i++)
+	{
+		list.Insert(i);
+	}
+	list.PrintAllData();
+
 	SetDbgFlag();
 	std::thread te = std::thread(threadCounter);
 	for (size_t i = 0; i < loop; i++)

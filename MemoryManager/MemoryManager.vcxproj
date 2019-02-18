@@ -122,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeltaTimer.h" />
+    <ClInclude Include="LinkedList.h" />
     <ClInclude Include="MemoryAllocator.h" />
     <ClInclude Include="MemoryStack.h" />
   </ItemGroup>
