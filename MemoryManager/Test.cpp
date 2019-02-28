@@ -46,6 +46,7 @@ void PreHeapPointerTest(std::vector<double> * allocTime, std::vector<double> * r
 
 void LinkedRawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
 void LinkedSmartPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
+void LinkedPreHeapPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
 
 void TestTestStruct(TestStruct* test);
 
@@ -88,8 +89,8 @@ int main(int commands, char * arr[])
 	read.clear();
 	random.clear();
 
-	LinkedSmartPointerTest(&alloc, &read, &random, size, 420);
-
+	//LinkedSmartPointerTest(&alloc, &read, &random, size, 420);
+	LinkedPreHeapPointerTest(&alloc, &read, &random, size, 420);
 }
 
 void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed)
@@ -352,7 +353,51 @@ void LinkedSmartPointerTest(std::vector<double>* allocTime, std::vector<double>*
 	OutputClass::Output("SmartLinkedListRelease.txt", *allocTime, *readTime, *randomAccess);
 
 }
+void LinkedPreHeapPointerTest(std::vector<double>* allocTime, std::vector<double>* readTime,
+	std::vector<double>* randomAccess, const unsigned& testSize, const unsigned& randomSeed)
+{
+	srand(randomSeed);
 
+	LinkedListOwnHeap<TestStruct> allocTest;
+
+	DeltaTimer timer;
+
+	std::cout << "Alloc: " << std::endl;
+	for (size_t i = 0; i < testSize; i++)
+	{
+		PrintProgress(i, testSize);
+
+		timer.Init();
+
+		allocTest.Insert(TestStruct());
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		allocTime->push_back(t);
+	}
+	std::cout << std::endl;
+
+	std::cout << "Read: " << std::endl;
+	allocTest.Test(readTime, testSize);
+	std::cout << std::endl;
+
+	std::cout << "Random Read: " << std::endl;
+	for (size_t i = 0; i < testSize; i++)
+	{
+		PrintProgress(i, testSize);
+
+		timer.Init();
+
+		TestStruct tmp = allocTest.GetAt(rand() % testSize);
+		TestTestStruct(&tmp);
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		randomAccess->push_back(t);
+	}
+	std::cout << std::endl;
+
+	OutputClass::Output("PreAllocLinkedList.txt", *allocTime, *readTime, *randomAccess);
+
+}
 void TestTestStruct(TestStruct* test)
 {
 	float x = test->x;

@@ -208,20 +208,20 @@ void LinkedListSmart<T>::Test(std::vector<double>* readTime, const unsigned& tes
 	}
 }
 #pragma endregion 
-
+template <typename T>
 class LinkedListOwnHeap
 {
 private:
 
 	struct Node
 	{
-		int data;
+		T data;
 		Node * next = nullptr;
 
-		Node(_In_opt_ const int & DATA = 0)
+		Node(_In_opt_ const T & DATA = 0, _In_opt_ Node * NEXT = nullptr)
 		{
 			data = DATA;
-			next = nullptr;
+			next = NEXT;
 		}
 
 	};
@@ -231,18 +231,28 @@ private:
 public:
 	LinkedListOwnHeap()
 	{
-		m_meme.Init();
+		MemoryStack::Init();
 	};
 	~LinkedListOwnHeap() = default;
 
 	Node * m_list = nullptr;
 
-	void Insert(_In_opt_ const int & data = 0);
+	void Insert(_In_opt_ const T & data = 0);
+	void Test(_In_opt_ std::vector<double> * readTime, const unsigned int & testSize);
+	const T & GetAt(_In_opt_ const unsigned int & index);
+
 	void PrintAllData();
 };
+template <typename T>
 
-inline void LinkedListOwnHeap::Insert(const int& data)
+inline void LinkedListOwnHeap<T>::Insert(const T& data)
 {
+	Node * next = m_meme.AllocData<Node>();
+	next->next = m_list;
+	next->data = data;
+
+	m_list = next;
+	return;
 	if (m_list == nullptr)
 	{
 		m_list = m_meme.AllocData<Node>();
@@ -274,7 +284,42 @@ inline void LinkedListOwnHeap::Insert(const int& data)
 	}
 }
 
-inline void LinkedListOwnHeap::PrintAllData()
+template <typename T>
+void LinkedListOwnHeap<T>::Test(std::vector<double>* readTime, const unsigned& testSize)
+{
+	DeltaTimer timer;
+
+	unsigned int counter = 0;
+	Node * node = m_list;
+	while (node != nullptr && counter < testSize)
+	{
+		PrintProgress(counter, testSize);
+
+		timer.Init();
+
+		node = node->next;
+		counter++;
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		readTime->push_back(t);
+	}
+}
+
+template <typename T>
+const T& LinkedListOwnHeap<T>::GetAt(const unsigned& index)
+{
+	unsigned int counter = 0;
+	Node * node = m_list;
+	while (node != nullptr && counter < index)
+	{
+		node = node->next;
+		counter++;
+	}
+	return node->data;
+}
+
+template <typename T>
+inline void LinkedListOwnHeap<T>::PrintAllData()
 {
 	int counter = 0;
 	Node * node = m_list;
