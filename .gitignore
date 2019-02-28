@@ -338,3 +338,5 @@ MemoryManager/output\.txt
 MemoryManager/RawLinkedList\.txt
 
 MemoryManager/SmartLinkedList\.txt
+
+MemoryManager/SmartLinkedListRelease\.txt

@@ -38,11 +38,7 @@ struct TestStruct
 	}
 };
 
-void PrintProgress(int i, int max)
-{
-	if ((i + 1) % 1000 == 0)
-		std::cout << "\r" << (static_cast<float>(i + 1) / static_cast<float>(max)) * 100.0f << "%";
-}
+
 
 void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
 void SmartPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed);
@@ -60,40 +56,39 @@ int main(int commands, char * arr[])
 	std::vector<double> random;
 
 	int size = 1024;
-	//size = 1000000;
+	size = 1000000;
 	if (commands > 1)
 	size = std::atoi(arr[1]);
 		
-	RawPointerTest(&alloc, &read, &random, size, 420);
-	OutputClass::Output("Raw.txt", alloc, read, random);
-	
-	alloc.clear();
-	read.clear();
-	random.clear();
-	
-	SmartPointerTest(&alloc, &read, &random, size, 420);
-	OutputClass::Output("Smart.txt", alloc, read, random);
-
-	alloc.clear();
-	read.clear();
-	random.clear();
-
-	PreHeapPointerTest(&alloc, &read, &random, size, 420);
-	OutputClass::Output("PreAlloc.txt", alloc, read, random);
-
-	alloc.clear();
-	read.clear();
-	random.clear();
-	
-	LinkedRawPointerTest(&alloc, &read, &random, size, 420);
-	OutputClass::Output("RawLinkedList.txt", alloc, read, random);
-
+	//RawPointerTest(&alloc, &read, &random, size, 420);
+	//OutputClass::Output("Raw.txt", alloc, read, random);
+	//
 	//alloc.clear();
 	//read.clear();
 	//random.clear();
+	//
+	//SmartPointerTest(&alloc, &read, &random, size, 420);
+	//OutputClass::Output("Smart.txt", alloc, read, random);
+	//
+	//alloc.clear();
+	//read.clear();
+	//random.clear();
+	//
+	//PreHeapPointerTest(&alloc, &read, &random, size, 420);
+	//OutputClass::Output("PreAlloc.txt", alloc, read, random);
+	//
+	//alloc.clear();
+	//read.clear();
+	//random.clear();
+	//
+	//LinkedRawPointerTest(&alloc, &read, &random, size, 420);
+	//OutputClass::Output("RawLinkedList.txt", alloc, read, random);
 
-	//LinkedSmartPointerTest(&alloc, &read, &random, size, 420);
-	//OutputClass::Output("SmartLinkedList.txt", alloc, read, random);
+	alloc.clear();
+	read.clear();
+	random.clear();
+
+	LinkedSmartPointerTest(&alloc, &read, &random, size, 420);
 
 }
 
@@ -287,17 +282,7 @@ void LinkedRawPointerTest(std::vector<double>* allocTime, std::vector<double>* r
 	std::cout << std::endl;
 
 	std::cout << "Read: " << std::endl;
-	for (size_t i = 0; i < testSize; i++)
-	{
-		PrintProgress(i, testSize);
-
-		timer.Init();
-		TestStruct * tmp = allocTest.GetAt(i);
-		TestTestStruct(tmp);
-
-		const double t = timer.GetDeltaTimeInSeconds();
-		readTime->push_back(t);
-	}
+	allocTest.Test(readTime, testSize);
 	std::cout << std::endl;
 
 	std::cout << "Random Read: " << std::endl;
@@ -317,7 +302,7 @@ void LinkedRawPointerTest(std::vector<double>* allocTime, std::vector<double>* r
 
 	for (size_t i = 0; i < testSize; i++)
 	{
-		delete allocTest.GetAt(i);
+		//delete allocTest.GetAt(i);
 	}
 
 
@@ -325,7 +310,47 @@ void LinkedRawPointerTest(std::vector<double>* allocTime, std::vector<double>* r
 void LinkedSmartPointerTest(std::vector<double>* allocTime, std::vector<double>* readTime,
 	std::vector<double>* randomAccess, const unsigned& testSize, const unsigned& randomSeed)
 {
-	
+	srand(randomSeed);
+
+	LinkedListSmart<TestStruct> allocTest;
+
+	DeltaTimer timer;
+
+	std::cout << "Alloc: " << std::endl;
+	for (size_t i = 0; i < testSize; i++)
+	{
+		PrintProgress(i, testSize);
+
+		timer.Init();
+
+		allocTest.Insert(TestStruct());
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		allocTime->push_back(t);
+	}
+	std::cout << std::endl;
+
+	std::cout << "Read: " << std::endl;
+	allocTest.Test(readTime, testSize);
+	std::cout << std::endl;
+
+	std::cout << "Random Read: " << std::endl;
+	for (size_t i = 0; i < testSize; i++)
+	{
+		PrintProgress(i, testSize);
+
+		timer.Init();
+
+		TestStruct tmp = allocTest.GetAt(rand() % testSize);
+		TestTestStruct(&tmp);
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		randomAccess->push_back(t);
+	}
+	std::cout << std::endl;
+
+	OutputClass::Output("SmartLinkedListRelease.txt", *allocTime, *readTime, *randomAccess);
+
 }
 
 void TestTestStruct(TestStruct* test)
