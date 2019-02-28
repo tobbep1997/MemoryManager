@@ -2,6 +2,12 @@
 #include <sal.h>
 #include <iostream>
 
+void PrintProgress(int i, int max)
+{
+	if ((i + 1) % 1000 == 0)
+		std::cout << "\r" << (static_cast<float>(i + 1) / static_cast<float>(max)) * 100.0f << "%";
+}
+
 #pragma region Raw
 template <typename T>
 class LinkedListRaw
@@ -13,10 +19,10 @@ private:
 		T data;
 		Node * next = nullptr;
 
-		Node(_In_opt_ const T & DATA = 0)
+		Node(_In_opt_ const T & DATA = 0, _In_ Node * NEXT = nullptr)
 		{
 			data = DATA;
-			next = nullptr;
+			next = NEXT;
 		}
 
 	};
@@ -30,6 +36,7 @@ public:
 	
 	void Insert(_In_opt_ const T & data = 0);
 	const T & GetAt(_In_opt_ const unsigned int & index);
+	void Test(_In_opt_ std::vector<double> * readTime, const unsigned int & testSize);
 	   
 	void PrintAllData();
 
@@ -37,29 +44,7 @@ public:
 template <typename T>
 inline void LinkedListRaw<T>::Insert(_In_opt_ const T & data)
 {
-	if (m_list == nullptr)
-	{
-		m_list = new Node(data);
-	}
-	else
-	{
-		if (m_list->next == nullptr)
-		{
-			m_list->next = new Node(data);
-		}
-		else
-		{
-			Node * node = nullptr;
-			Node * nextNode = m_list->next;
-			while (nextNode != nullptr)
-			{
-				node = nextNode;
-				nextNode = nextNode->next;
-				
-			}
-			node->next = new Node(data);
-		}
-	}
+	m_list = new Node(data, m_list);	
 }
 template <typename T>
 inline void LinkedListRaw<T>::PrintAllData()
@@ -85,22 +70,46 @@ inline const T& LinkedListRaw<T>::GetAt(const unsigned& index)
 	}
 	return node->data;
 }
+
+template <typename T>
+void LinkedListRaw<T>::Test(std::vector<double>* readTime, const unsigned& testSize)
+{
+	DeltaTimer timer;
+	   
+	unsigned int counter = 0;
+	Node * node = m_list;
+	while (node != nullptr && counter < testSize)
+	{
+		PrintProgress(counter, testSize);
+
+		timer.Init();
+
+		node = node->next;
+		counter++;
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		readTime->push_back(t);
+	}
+
+	
+}
 #pragma endregion 
 
 #pragma region Smart
+template <typename T>
 class LinkedListSmart
 {
 private:
 
 	struct Node
 	{
-		int data;
+		T data;
 		std::shared_ptr<Node> next = nullptr;
 
-		Node(_In_opt_ const int & DATA = 0)
+		Node(_In_opt_ const T & DATA = 0, _In_opt_ std::shared_ptr<Node> NEXT = nullptr)
 		{
 			data = DATA;
-			next = nullptr;
+			next = NEXT;
 		}
 
 	};
@@ -112,16 +121,24 @@ public:
 
 	std::shared_ptr<Node> m_list = nullptr;
 
-	void Insert(_In_opt_ const int & data = 0);
-	const int & GetAt(_In_opt_ const unsigned int & index);
+	void Insert(_In_opt_ const T & data = 0);
+	const T & GetAt(_In_opt_ const unsigned int & index);
+	void Test(_In_opt_ std::vector<double> * readTime, const unsigned int & testSize);
+
+
 	void PrintAllData();
 
 };
-inline void LinkedListSmart::Insert(_In_opt_ const int& data)
+
+template <typename T>
+inline void LinkedListSmart<T>::Insert(_In_opt_ const T& data)
 {
+	m_list = std::make_shared<Node>(data, m_list);
+	return;
 	if (m_list == nullptr)
 	{
-		m_list = std::make_shared<Node>(data);
+
+		
 	}
 	else
 	{
@@ -143,7 +160,9 @@ inline void LinkedListSmart::Insert(_In_opt_ const int& data)
 		}
 	}
 }
-inline void LinkedListSmart::PrintAllData()
+
+template <typename T>
+inline void LinkedListSmart<T>::PrintAllData()
 {
 	int counter = 0;
 	std::shared_ptr<Node> node = m_list;
@@ -155,7 +174,8 @@ inline void LinkedListSmart::PrintAllData()
 	}
 }
 
-const int& LinkedListSmart::GetAt(const unsigned& index)
+template <typename T>
+const T& LinkedListSmart<T>::GetAt(const unsigned& index)
 {
 	unsigned int counter = 0;
 	Node * node = m_list.get();
@@ -165,6 +185,27 @@ const int& LinkedListSmart::GetAt(const unsigned& index)
 		counter++;
 	}
 	return node->data;
+}
+
+template <typename T>
+void LinkedListSmart<T>::Test(std::vector<double>* readTime, const unsigned& testSize)
+{
+	DeltaTimer timer;
+
+	unsigned int counter = 0;
+	Node * node = m_list.get();
+	while (node != nullptr && counter < testSize)
+	{
+		PrintProgress(counter, testSize);
+
+		timer.Init();
+
+		node = node->next.get();
+		counter++;
+
+		const double t = timer.GetDeltaTimeInSeconds();
+		readTime->push_back(t);
+	}
 }
 #pragma endregion 
 
