@@ -127,6 +127,7 @@
     <ClInclude Include="MemoryAllocator.h" />
     <ClInclude Include="MemoryStack.h" />
     <ClInclude Include="OutputClass.h" />
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

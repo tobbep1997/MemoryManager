@@ -9,6 +9,7 @@
 #include "OutputClass.h"
 #include <cstdlib>
 #include <string>
+#include "Timer.h"
 
 void SetDbgFlag()
 {
@@ -61,12 +62,12 @@ int main(int commands, char * arr[])
 	if (commands > 1)
 	size = std::atoi(arr[1]);
 		
-	//RawPointerTest(&alloc, &read, &random, size, 420);
-	//OutputClass::Output("Raw.txt", alloc, read, random);
-	//
-	//alloc.clear();
-	//read.clear();
-	//random.clear();
+	RawPointerTest(&alloc, &read, &random, size, 420);
+	OutputClass::Output("Raw.txt", alloc, read, random);
+	
+	alloc.clear();
+	read.clear();
+	random.clear();
 	//
 	//SmartPointerTest(&alloc, &read, &random, size, 420);
 	//OutputClass::Output("Smart.txt", alloc, read, random);
@@ -85,12 +86,12 @@ int main(int commands, char * arr[])
 	//LinkedRawPointerTest(&alloc, &read, &random, size, 420);
 	//OutputClass::Output("RawLinkedList.txt", alloc, read, random);
 
-	alloc.clear();
-	read.clear();
-	random.clear();
+	//alloc.clear();
+	//read.clear();
+	//random.clear();
 
 	//LinkedSmartPointerTest(&alloc, &read, &random, size, 420);
-	LinkedPreHeapPointerTest(&alloc, &read, &random, size, 420);
+	//LinkedPreHeapPointerTest(&alloc, &read, &random, size, 420);
 }
 
 void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readTime, std::vector<double> * randomAccess, const unsigned int & testSize, const unsigned int & randomSeed)
@@ -98,14 +99,16 @@ void RawPointerTest(std::vector<double> * allocTime, std::vector<double> * readT
 	srand(randomSeed);
 	TestStruct ** allocTest = new TestStruct*[testSize];
 
-	DeltaTimer timer;
+	//DeltaTimer timer;
+
+	Timer timer;
 	
 	std::cout << "Alloc: " << std::endl;
 	for (size_t i = 0; i < testSize; i++)
 	{
 		PrintProgress(i, testSize);
 
-		timer.Init();
+		timer.Init();		
 
 		allocTest[i] = new TestStruct();
 
